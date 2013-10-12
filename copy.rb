@@ -1,8 +1,9 @@
+#!/usr/bin/ruby
 require 'fileutils'
 require 'nokogiri'
 
 if ARGV.count != 2 then
-  puts "Wrong number of arguments\n\t./ruby copy.rb xspf-file destination"
+  puts "Wrong number of arguments\n\tcopy.rb xspf-file destination"
   exit
 end
 
