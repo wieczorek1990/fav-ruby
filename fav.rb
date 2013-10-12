@@ -14,14 +14,13 @@ input = ARGV[0]
 output = ARGV[1]
 dir = ARGV[2]
 
-doc = Nokogiri.XML(open(input))
-favourites_collection = doc.xpath('//ns:track', ns: 'http://xspf.org/ns/0/')
-
 mongo_client = MongoClient.new
 db = mongo_client.db('db')
 collection = db.collection('collection')
 collection.remove
 
+doc = Nokogiri.XML(open(input))
+favourites_collection = doc.xpath('//ns:track', ns: 'http://xspf.org/ns/0/')
 favourites_collection.each do |track|
   collection.insert(title: track.children[0].children.text, creator: track.children[1].children.text)
 end
