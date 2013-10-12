@@ -36,6 +36,12 @@ Find.find(dir) do |path|
 end
 
 i = 1
+doc = Nokogiri::XML::Document.new
+doc.encoding = 'UTF-8'
+playlists_node = Nokogiri::XML::Node.new('playlists', doc)
+playlists_node['version'] = 1
+playlists_node['xmlns'] = 'http://xspf.org/ns/0/'
+doc << playlists_node
 file_collection.each do |path|
   print "\r#{i}/#{file_collection_count}"
   TagLib::FileRef.open(path) do |fileref|
@@ -45,11 +51,19 @@ file_collection.each do |path|
       creator = tag.artist
       found = collection.find_one(title: title, creator: creator)
       unless found.nil?
-        # add path as location in output
+        track_node = Nokogiri::XML::Node.new('track', doc)
+        title_node = Nokogiri::XML::Node.new('title', doc)
+        location_node = Nokogiri::XML::Node.new('location', doc)
+        title_node << Nokogiri::XML::Text.new(title, doc)
+        location_node << Nokogiri::XML::Text.new(path, doc)
+        track_node << title_node
+        track_node << location_node
+        playlists_node << track_node
         collection.remove(title: title, creator: creator)
       end
     end
   end
   i = i + 1
 end
+File.new(output, 'w').write(doc.to_xml)
 puts
