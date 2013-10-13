@@ -37,10 +37,12 @@ end
 i = 1
 doc = Nokogiri::XML::Document.new
 doc.encoding = 'UTF-8'
-playlists_node = Nokogiri::XML::Node.new('playlists', doc)
-playlists_node['version'] = 1
-playlists_node['xmlns'] = 'http://xspf.org/ns/0/'
-doc << playlists_node
+playlist_node = Nokogiri::XML::Node.new('playlist', doc)
+playlist_node['xmlns'] = 'http://xspf.org/ns/0/'
+playlist_node['version'] = 1
+track_list_node = Nokogiri::XML::Node.new('trackList', doc)
+playlist_node << track_list_node
+doc << playlist_node
 file_collection.each do |path|
   print "\r#{i}/#{file_collection_count}"
   TagLib::FileRef.open(path) do |fileref|
@@ -51,13 +53,13 @@ file_collection.each do |path|
       found = collection.find_one(title: title, creator: creator)
       unless found.nil?
         track_node = Nokogiri::XML::Node.new('track', doc)
-        title_node = Nokogiri::XML::Node.new('title', doc)
         location_node = Nokogiri::XML::Node.new('location', doc)
-        title_node << Nokogiri::XML::Text.new(title, doc)
+        title_node = Nokogiri::XML::Node.new('title', doc)
         location_node << Nokogiri::XML::Text.new(path, doc)
-        track_node << title_node
+        title_node << Nokogiri::XML::Text.new(title, doc)
         track_node << location_node
-        playlists_node << track_node
+        track_node << title_node
+        track_list_node << track_node
         collection.remove(title: title, creator: creator)
       end
     end
